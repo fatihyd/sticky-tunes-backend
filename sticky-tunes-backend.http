@@ -1,0 +1,6 @@
+@sticky_tunes_backend_HostAddress = http://localhost:5139
+
+GET {{sticky_tunes_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
