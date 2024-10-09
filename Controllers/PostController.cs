@@ -1,0 +1,75 @@
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using sticky_tunes_backend.Data;
+using sticky_tunes_backend.DTOs;
+using sticky_tunes_backend.Models;
+
+namespace sticky_tunes_backend.Controllers;
+
+[ApiController]
+[Route("api/posts")]
+public class PostController : ControllerBase
+{
+    private readonly DataContext _context;
+    private readonly IMapper _mapper;
+
+    public PostController(DataContext context, IMapper mapper)
+    {
+        _context = context;
+        _mapper = mapper;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllPosts()
+    {
+        var posts = await _context.Posts.ToListAsync();
+        
+        var getPostDtos = _mapper.Map<List<GetPostDto>>(posts);
+        
+        return Ok(getPostDtos);
+    }
+
+    [HttpGet]
+    [Route("{id}")]
+    public async Task<IActionResult> GetPostById([FromRoute] int id)
+    {
+        var post = await _context.Posts.FindAsync(id);
+        
+        if (post == null)
+            return NotFound();
+        
+        var getPostDto = _mapper.Map<GetPostDto>(post);
+        
+        return Ok(getPostDto);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreatePost([FromBody] CreatePostDto createPostDto)
+    {
+        var post = _mapper.Map<Post>(createPostDto);
+        post.DatePosted = DateTime.Now;
+        
+        _context.Posts.Add(post);
+        await _context.SaveChangesAsync();
+
+        var getPostDto = _mapper.Map<GetPostDto>(post);
+        
+        return CreatedAtAction(nameof(GetPostById), new { id = post.Id}, getPostDto);
+    }
+
+    [HttpDelete]
+    [Route("{id}")]
+    public async Task<IActionResult> DeletePost([FromRoute] int id)
+    {
+        var post = await _context.Posts.FindAsync(id);
+        
+        if (post == null)
+            return NotFound();
+        
+        _context.Posts.Remove(post);
+        await _context.SaveChangesAsync();
+        
+        return NoContent();
+    }
+}
