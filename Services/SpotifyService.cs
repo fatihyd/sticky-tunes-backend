@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using sticky_tunes_backend.Models;
 
 namespace sticky_tunes_backend.Services;
 
@@ -53,7 +54,20 @@ public class SpotifyService
         return token;
     }
 
-    public async Task<dynamic> GetTrackInfoAsync(string trackId)
+    public string ExtractTrackId(string trackUrl)
+    {
+        var uri = new Uri(trackUrl);
+        var segments = uri.Segments;
+        if (segments.Length < 3 || segments[1].ToLower() != "track/")
+        {
+            // Return an empty string if it doesn't match the expected structure
+            return string.Empty;
+        }
+
+        return segments.Last();
+    }
+
+    public async Task<Track> GetTrackAsync(string trackId)
     {
         // Get the access token first
         var accessToken = await GetAccessTokenAsync();
@@ -79,10 +93,20 @@ public class SpotifyService
             throw new HttpRequestException($"Failed to retrieve track data: {response.StatusCode}");
         }
 
-        // Parse and return the track data
+        // Parse the response JSON
         var jsonResponse = await response.Content.ReadAsStringAsync();
-        var trackData = JsonSerializer.Deserialize<dynamic>(jsonResponse);
+        var jsonDocument = JsonDocument.Parse(jsonResponse);
+        
+        // Map relevant fields from the JSON to the Track object
+        var track = new Track
+        {
+            SpotifyUrl = jsonDocument.RootElement.GetProperty("external_urls").GetProperty("spotify").GetString(),
+            Name = jsonDocument.RootElement.GetProperty("name").GetString(),
+            ArtistNames = jsonDocument.RootElement.GetProperty("artists").EnumerateArray()
+                .Select(artist => artist.GetProperty("name").GetString()).ToList(),
+            AlbumName = jsonDocument.RootElement.GetProperty("album").GetProperty("name").GetString()
+        };
 
-        return trackData;
+        return track;
     }
 }    

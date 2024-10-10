@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using sticky_tunes_backend.Data;
 using sticky_tunes_backend.DTOs;
 using sticky_tunes_backend.Models;
+using sticky_tunes_backend.Services;
 
 namespace sticky_tunes_backend.Controllers;
 
@@ -12,18 +13,22 @@ namespace sticky_tunes_backend.Controllers;
 public class PostController : ControllerBase
 {
     private readonly DataContext _context;
+    private readonly SpotifyService _spotifyService;
     private readonly IMapper _mapper;
 
-    public PostController(DataContext context, IMapper mapper)
+    public PostController(DataContext context, SpotifyService spotifyService, IMapper mapper)
     {
         _context = context;
+        _spotifyService = spotifyService;
         _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAllPosts()
     {
-        var posts = await _context.Posts.ToListAsync();
+        var posts = await _context.Posts
+            .Include(p => p.Track)
+            .ToListAsync();
         
         var getPostDtos = _mapper.Map<List<GetPostDto>>(posts);
         
@@ -34,7 +39,9 @@ public class PostController : ControllerBase
     [Route("{id}")]
     public async Task<IActionResult> GetPostById([FromRoute] int id)
     {
-        var post = await _context.Posts.FindAsync(id);
+        var post = await _context.Posts
+            .Include(p => p.Track)
+            .FirstOrDefaultAsync(p => p.Id == id);
         
         if (post == null)
             return NotFound();
@@ -47,12 +54,25 @@ public class PostController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreatePost([FromBody] CreatePostDto createPostDto)
     {
-        var post = _mapper.Map<Post>(createPostDto);
-        post.DatePosted = DateTime.Now;
+        var trackId = _spotifyService.ExtractTrackId(createPostDto.SpotifyUrl);
+        if (trackId == string.Empty)
+        {
+            return BadRequest("Invalid Spotify Url!");
+        }
         
-        _context.Posts.Add(post);
-        await _context.SaveChangesAsync();
+        var track = await _spotifyService.GetTrackAsync(trackId);
+        _context.Tracks.Add(track);
 
+        var post = new Post
+        {
+            Track = track,
+            Text = createPostDto.Text,
+            DatePosted = DateTime.Now
+        };
+        _context.Posts.Add(post);
+        
+        await _context.SaveChangesAsync();
+        
         var getPostDto = _mapper.Map<GetPostDto>(post);
         
         return CreatedAtAction(nameof(GetPostById), new { id = post.Id}, getPostDto);

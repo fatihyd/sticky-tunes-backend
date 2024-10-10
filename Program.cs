@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using sticky_tunes_backend.Data;
 using sticky_tunes_backend.Mappings;
+using sticky_tunes_backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<DataContext>(options => { options.UseMySQL(connectionString); });
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+// HttpClient for external API calls
+builder.Services.AddHttpClient();
+// SpotifyService as scoped
+builder.Services.AddScoped<SpotifyService>();
 
 /* */
 
