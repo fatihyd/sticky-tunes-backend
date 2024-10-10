@@ -67,8 +67,11 @@ public class SpotifyService
         return segments.Last();
     }
 
-    public async Task<Track> GetTrackAsync(string trackId)
+    public async Task<Track> GetTrackAsync(string trackUrl)
     {
+        // Extract the track id from the URL
+        var trackId = ExtractTrackId(trackUrl);
+
         // Get the access token first
         var accessToken = await GetAccessTokenAsync();
 
@@ -100,11 +103,14 @@ public class SpotifyService
         // Map relevant fields from the JSON to the Track object
         var track = new Track
         {
-            SpotifyUrl = jsonDocument.RootElement.GetProperty("external_urls").GetProperty("spotify").GetString(),
+            SpotifyTrackId = jsonDocument.RootElement.GetProperty("id").GetString(),
             Name = jsonDocument.RootElement.GetProperty("name").GetString(),
-            ArtistNames = jsonDocument.RootElement.GetProperty("artists").EnumerateArray()
-                .Select(artist => artist.GetProperty("name").GetString()).ToList(),
-            AlbumName = jsonDocument.RootElement.GetProperty("album").GetProperty("name").GetString()
+            AlbumName = jsonDocument.RootElement.GetProperty("album").GetProperty("name").GetString(),
+            Artists = jsonDocument.RootElement.GetProperty("artists").EnumerateArray()
+                .Select(artist => new Artist 
+                { 
+                    Name = artist.GetProperty("name").GetString() 
+                }).ToList()
         };
 
         return track;

@@ -54,13 +54,7 @@ public class PostController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreatePost([FromBody] CreatePostDto createPostDto)
     {
-        var trackId = _spotifyService.ExtractTrackId(createPostDto.SpotifyUrl);
-        if (trackId == string.Empty)
-        {
-            return BadRequest("Invalid Spotify Url!");
-        }
-        
-        var track = await _spotifyService.GetTrackAsync(trackId);
+        var track = await _spotifyService.GetTrackAsync(createPostDto.SpotifyUrl);
         _context.Tracks.Add(track);
 
         var post = new Post
