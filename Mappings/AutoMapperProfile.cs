@@ -9,8 +9,8 @@ public class AutoMapperProfile : Profile
     public AutoMapperProfile()
     {
         CreateMap<Post, GetPostDto>();
-        CreateMap<CreatePostDto, Post>(); // forgot to add this line on the previous commit -_-
+        CreateMap<CreatePostDto, Post>();
         CreateMap<Comment, GetCommentDto>();
-        
+        CreateMap<CreateCommentDto, Comment>();
     }
 }
