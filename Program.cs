@@ -20,6 +20,12 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 builder.Services.AddHttpClient();
 // SpotifyService as scoped
 builder.Services.AddScoped<SpotifyService>();
+// CORS stuff
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
 
 /* */
 
@@ -37,6 +43,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+/* */
+// Use the policy
+app.UseCors("AllowAll");
+/* */
 
 app.UseAuthorization();
 
