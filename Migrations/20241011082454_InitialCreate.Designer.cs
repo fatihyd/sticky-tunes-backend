@@ -11,7 +11,7 @@ using sticky_tunes_backend.Data;
 namespace sticky_tunes_backend.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241010222839_InitialCreate")]
+    [Migration("20241011082454_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -57,9 +57,14 @@ namespace sticky_tunes_backend.Migrations
                     b.Property<string>("Text")
                         .HasColumnType("longtext");
 
+                    b.Property<int>("TrackId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PostId");
+
+                    b.HasIndex("TrackId");
 
                     b.ToTable("Comments");
                 });
@@ -125,7 +130,15 @@ namespace sticky_tunes_backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("sticky_tunes_backend.Models.Track", "Track")
+                        .WithMany()
+                        .HasForeignKey("TrackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Post");
+
+                    b.Navigation("Track");
                 });
 
             modelBuilder.Entity("sticky_tunes_backend.Models.Post", b =>

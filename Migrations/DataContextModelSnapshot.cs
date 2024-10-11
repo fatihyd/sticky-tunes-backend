@@ -54,9 +54,14 @@ namespace sticky_tunes_backend.Migrations
                     b.Property<string>("Text")
                         .HasColumnType("longtext");
 
+                    b.Property<int>("TrackId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PostId");
+
+                    b.HasIndex("TrackId");
 
                     b.ToTable("Comments");
                 });
@@ -122,7 +127,15 @@ namespace sticky_tunes_backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("sticky_tunes_backend.Models.Track", "Track")
+                        .WithMany()
+                        .HasForeignKey("TrackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Post");
+
+                    b.Navigation("Track");
                 });
 
             modelBuilder.Entity("sticky_tunes_backend.Models.Post", b =>

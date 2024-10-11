@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using sticky_tunes_backend.Data;
 using sticky_tunes_backend.DTOs;
 using sticky_tunes_backend.Models;
+using sticky_tunes_backend.Services;
 
 namespace sticky_tunes_backend.Controllers;
 
@@ -12,18 +13,23 @@ namespace sticky_tunes_backend.Controllers;
 public class CommentController : ControllerBase
 {
     private readonly DataContext _context;
+    private readonly SpotifyService _spotifyService;
     private readonly IMapper _mapper;
 
-    public CommentController(DataContext context, IMapper mapper)
+    public CommentController(DataContext context, SpotifyService spotifyService, IMapper mapper)
     {
         _context = context;
+        _spotifyService = spotifyService;
         _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAllComments([FromRoute] int postId)
     {
-        var comments = await _context.Comments.Where(c => c.Post.Id == postId).ToListAsync();
+        var comments = await _context.Comments
+            .Where(c => c.Post.Id == postId)
+            .Include(c => c.Track)
+            .ToListAsync();
         
         var getCommentDtos = _mapper.Map<List<GetCommentDto>>(comments);
         
@@ -36,7 +42,8 @@ public class CommentController : ControllerBase
     {
         var comment = await _context.Comments
             .Where(c => c.Id == commentId && c.Post.Id == postId)
-            .SingleOrDefaultAsync();
+            .Include(p => p.Track)
+            .FirstOrDefaultAsync();
         
         if (comment == null)
             return NotFound();
@@ -49,16 +56,23 @@ public class CommentController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateComment([FromRoute] int postId, [FromBody] CreateCommentDto createCommentDto)
     {
-        var comment = _mapper.Map<Comment>(createCommentDto);
-        comment.DatePosted = DateTime.Now;
-        comment.Post = await _context.Posts.FindAsync(postId);
-        
-        _context.Comments.Add(comment);
-        await _context.SaveChangesAsync();
+        var track = await _spotifyService.GetTrackAsync(createCommentDto.SpotifyUrl);
+        _context.Tracks.Add(track);
 
+        var comment = new Comment
+        {
+            Track = track,
+            Text = createCommentDto.Text,
+            DatePosted = DateTime.Now,
+            Post = await _context.Posts.FindAsync(postId)
+        };
+        _context.Comments.Add(comment);
+        
+        await _context.SaveChangesAsync();
+        
         var getCommentDto = _mapper.Map<GetCommentDto>(comment);
         
-        return CreatedAtAction(nameof(GetCommentById), new { postId = postId, id = comment.Id}, getCommentDto);
+        return CreatedAtAction(nameof(GetCommentById), new { postId = postId, commentId = comment.Id}, getCommentDto);
     }
 
     [HttpDelete]

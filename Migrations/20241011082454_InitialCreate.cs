@@ -79,6 +79,7 @@ namespace sticky_tunes_backend.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    TrackId = table.Column<int>(type: "int", nullable: false),
                     Text = table.Column<string>(type: "longtext", nullable: true),
                     DatePosted = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     PostId = table.Column<int>(type: "int", nullable: false)
@@ -90,6 +91,12 @@ namespace sticky_tunes_backend.Migrations
                         name: "FK_Comments_Posts_PostId",
                         column: x => x.PostId,
                         principalTable: "Posts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Comments_Tracks_TrackId",
+                        column: x => x.TrackId,
+                        principalTable: "Tracks",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -104,6 +111,11 @@ namespace sticky_tunes_backend.Migrations
                 name: "IX_Comments_PostId",
                 table: "Comments",
                 column: "PostId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comments_TrackId",
+                table: "Comments",
+                column: "TrackId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Posts_TrackId",
