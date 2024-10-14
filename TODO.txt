@@ -1,3 +1,6 @@
 => Cascade delete
 => Automapper refactor
+=> REFACTOR: Repository pattern (IRepository generic (T) interface...)
+=> Clearer DTO names?
+=> REFACTOR: Validation
 => 
