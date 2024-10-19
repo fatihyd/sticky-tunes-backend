@@ -7,12 +7,26 @@ using MySql.EntityFrameworkCore.Metadata;
 namespace sticky_tunes_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class initial_migration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Artists",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "longtext", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Artists", x => x.Id);
+                })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
@@ -32,22 +46,27 @@ namespace sticky_tunes_backend.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Artist",
+                name: "ArtistTrack",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "longtext", nullable: false),
-                    TrackId = table.Column<int>(type: "int", nullable: true)
+                    ArtistsId = table.Column<int>(type: "int", nullable: false),
+                    TracksId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Artist", x => x.Id);
+                    table.PrimaryKey("PK_ArtistTrack", x => new { x.ArtistsId, x.TracksId });
                     table.ForeignKey(
-                        name: "FK_Artist_Tracks_TrackId",
-                        column: x => x.TrackId,
+                        name: "FK_ArtistTrack_Artists_ArtistsId",
+                        column: x => x.ArtistsId,
+                        principalTable: "Artists",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ArtistTrack_Tracks_TracksId",
+                        column: x => x.TracksId,
                         principalTable: "Tracks",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -57,9 +76,9 @@ namespace sticky_tunes_backend.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    TrackId = table.Column<int>(type: "int", nullable: false),
                     Text = table.Column<string>(type: "longtext", nullable: false),
-                    DatePosted = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    DatePosted = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    TrackId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -79,9 +98,9 @@ namespace sticky_tunes_backend.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    TrackId = table.Column<int>(type: "int", nullable: false),
                     Text = table.Column<string>(type: "longtext", nullable: true),
                     DatePosted = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    TrackId = table.Column<int>(type: "int", nullable: false),
                     PostId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -103,9 +122,9 @@ namespace sticky_tunes_backend.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Artist_TrackId",
-                table: "Artist",
-                column: "TrackId");
+                name: "IX_ArtistTrack_TracksId",
+                table: "ArtistTrack",
+                column: "TracksId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comments_PostId",
@@ -127,10 +146,13 @@ namespace sticky_tunes_backend.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Artist");
+                name: "ArtistTrack");
 
             migrationBuilder.DropTable(
                 name: "Comments");
+
+            migrationBuilder.DropTable(
+                name: "Artists");
 
             migrationBuilder.DropTable(
                 name: "Posts");

@@ -19,6 +19,21 @@ namespace sticky_tunes_backend.Migrations
                 .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
+            modelBuilder.Entity("ArtistTrack", b =>
+                {
+                    b.Property<int>("ArtistsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TracksId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ArtistsId", "TracksId");
+
+                    b.HasIndex("TracksId");
+
+                    b.ToTable("ArtistTrack");
+                });
+
             modelBuilder.Entity("sticky_tunes_backend.Models.Artist", b =>
                 {
                     b.Property<int>("Id")
@@ -29,14 +44,9 @@ namespace sticky_tunes_backend.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("TrackId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("TrackId");
-
-                    b.ToTable("Artist");
+                    b.ToTable("Artists");
                 });
 
             modelBuilder.Entity("sticky_tunes_backend.Models.Comment", b =>
@@ -112,11 +122,19 @@ namespace sticky_tunes_backend.Migrations
                     b.ToTable("Tracks");
                 });
 
-            modelBuilder.Entity("sticky_tunes_backend.Models.Artist", b =>
+            modelBuilder.Entity("ArtistTrack", b =>
                 {
+                    b.HasOne("sticky_tunes_backend.Models.Artist", null)
+                        .WithMany()
+                        .HasForeignKey("ArtistsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("sticky_tunes_backend.Models.Track", null)
-                        .WithMany("Artists")
-                        .HasForeignKey("TrackId");
+                        .WithMany()
+                        .HasForeignKey("TracksId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("sticky_tunes_backend.Models.Comment", b =>
@@ -128,7 +146,7 @@ namespace sticky_tunes_backend.Migrations
                         .IsRequired();
 
                     b.HasOne("sticky_tunes_backend.Models.Track", "Track")
-                        .WithMany()
+                        .WithMany("Comments")
                         .HasForeignKey("TrackId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -141,7 +159,7 @@ namespace sticky_tunes_backend.Migrations
             modelBuilder.Entity("sticky_tunes_backend.Models.Post", b =>
                 {
                     b.HasOne("sticky_tunes_backend.Models.Track", "Track")
-                        .WithMany()
+                        .WithMany("Posts")
                         .HasForeignKey("TrackId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -156,7 +174,9 @@ namespace sticky_tunes_backend.Migrations
 
             modelBuilder.Entity("sticky_tunes_backend.Models.Track", b =>
                 {
-                    b.Navigation("Artists");
+                    b.Navigation("Comments");
+
+                    b.Navigation("Posts");
                 });
 #pragma warning restore 612, 618
         }
