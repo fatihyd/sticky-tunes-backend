@@ -9,7 +9,7 @@ using sticky_tunes_backend.Data;
 
 namespace sticky_tunes_backend.Migrations
 {
-    [DbContext(typeof(DataContext))]
+    [DbContext(typeof(StickyTunesDbContext))]
     partial class DataContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

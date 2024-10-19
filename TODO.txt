@@ -4,5 +4,4 @@
 => Clearer DTO names?
 => REFACTOR: Validation
 
-=> REFACTOR: Change the name of the class "DataContext" to "StickyTunesContext" to follow best practices
 => 

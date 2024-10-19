@@ -10,7 +10,7 @@ using sticky_tunes_backend.Data;
 
 namespace sticky_tunes_backend.Migrations
 {
-    [DbContext(typeof(DataContext))]
+    [DbContext(typeof(StickyTunesDbContext))]
     [Migration("20241019201255_initial_migration")]
     partial class initial_migration
     {

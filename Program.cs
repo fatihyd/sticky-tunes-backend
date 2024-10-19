@@ -13,7 +13,7 @@ builder.Services.AddControllers();
 
 // Database connection
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<DataContext>(options => { options.UseMySQL(connectionString); });
+builder.Services.AddDbContext<StickyTunesDbContext>(options => { options.UseMySQL(connectionString); });
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 // HttpClient for external API calls

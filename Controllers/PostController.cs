@@ -12,11 +12,11 @@ namespace sticky_tunes_backend.Controllers;
 [Route("api/posts")]
 public class PostController : ControllerBase
 {
-    private readonly DataContext _context;
+    private readonly StickyTunesDbContext _context;
     private readonly SpotifyService _spotifyService;
     private readonly IMapper _mapper;
 
-    public PostController(DataContext context, SpotifyService spotifyService, IMapper mapper)
+    public PostController(StickyTunesDbContext context, SpotifyService spotifyService, IMapper mapper)
     {
         _context = context;
         _spotifyService = spotifyService;

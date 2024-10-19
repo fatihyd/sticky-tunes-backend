@@ -3,9 +3,9 @@ using sticky_tunes_backend.Models;
 
 namespace sticky_tunes_backend.Data;
 
-public class DataContext : DbContext
+public class StickyTunesDbContext : DbContext
 {
-    public DataContext(DbContextOptions options) : base(options)
+    public StickyTunesDbContext(DbContextOptions options) : base(options)
     {
     }
     
